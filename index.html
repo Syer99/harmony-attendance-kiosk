@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Attendance Kiosk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
+    <style>
+        :root {
+            --color-in: #10b981; 
+            --color-out: #3b82f6; 
+            --color-danger: #ef4444; 
+            --text-main: #1e293b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff; /* PURE WHITE BACKGROUND */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .active-screen {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .clean-panel {
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            padding: 10px;
+        }
+
+        .company-logo {
+            max-width: 160px; 
+            max-height: 130px;
+            margin-bottom: 25px;
+            object-fit: contain;
+            align-self: center;
+        }
+
+        h1 { margin: 0 0 5px 0; font-size: 28px; font-weight: 600; }
+        h2 { margin-top: 0; font-weight: 600; }
+        p { color: #64748b; margin-bottom: 30px; }
+
+        .btn-main {
+            width: 100%;
+            padding: 25px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 16px;
+            font-size: 22px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-main:active { transform: scale(0.95); }
+        .btn-in { background: var(--color-in); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); }
+        .btn-out { background: var(--color-out); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25); }
+
+        .name-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+            overflow-y: auto;
+            padding: 5px;
+            max-height: 60vh;
+        }
+
+        .btn-name {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 15px 10px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: all 0.2s;
+            word-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .btn-name:active {
+            background: #f1f5f9;
+            transform: translateY(2px);
+        }
+
+        #video-container {
+            width: 100%;
+            max-width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 25px;
+            border: 4px solid #f1f5f9;
+            background: #000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; }
+        canvas { display: none; }
+
+        .btn-snap {
+            background: var(--text-main);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .btn-back {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 16px;
+            margin-top: 25px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn-admin-trigger {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            width: 45px;
+            height: 45px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            color: #94a3b8;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-admin-trigger:active { transform: scale(0.9); }
+
+        .admin-list {
+            text-align: left;
+            overflow-y: auto;
+            max-height: 40vh;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px;
+        }
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .admin-item:last-child { border-bottom: none; }
+        .btn-delete {
+            background: var(--color-danger); color: white;
+            border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+        }
+        .admin-inputs { display: flex; gap: 10px; }
+        .admin-inputs input {
+            flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Poppins';
+        }
+        .btn-add { background: var(--text-main); color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; }
+        .btn-sheet { background: #10b981; color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; margin-top: 20px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="screen-main" class="screen active-screen">
+        <div class="clean-panel">
+            <img src="harmony_logo.png" alt="Harmony Logo" class="company-logo" id="company-logo">
+            
+            <h1>Company Kiosk</h1>
+            <p>Please select your action</p>
+            <button class="btn-main btn-in" onclick="selectType('IN')">CLOCK IN</button>
+            <button class="btn-main btn-out" onclick="selectType('OUT')">CLOCK OUT</button>
+        </div>
+        <button class="btn-admin-trigger" onclick="requestPin()">⚙️</button>
+    </div>
+
+    <div id="screen-names" class="screen">
+        <div class="clean-panel">
+            <h2 id="type-title">Select Name</h2>
+            <div class="name-grid" id="name-list"></div>
+            <button class="btn-back" onclick="showScreen('screen-main')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="screen-camera" class="screen">
+        <div class="clean-panel">
+            <h2 id="staff-name-title">Staff Name</h2>
+            <p>Please look at the camera</p>
+            
+            <div id="video-container">
+                <video id="video" autoplay playsinline></video>
+            </div>
+            <canvas id="canvas"></canvas>
+            
+            <button class="btn-snap" onclick="takeSnapshot()">SNAP & SUBMIT</button>
+            <button class="btn-back" onclick="stopCamera(); showScreen('screen-names')">Back</button>
+        </div>
+    </div>
+
+    <div id="screen-admin" class="screen">
+        <div class="clean-panel">
+            <h2>HR Admin Portal</h2>
+            <p>Manage Employee List</p>
+            
+            <div class="admin-list" id="admin-employee-list"></div>
+
+            <div class="admin-inputs">
+                <input type="text" id="new-employee-name" placeholder="New Staff Name..." autocomplete="off">
+                <button class="btn-add" onclick="addEmployee()">Add</button>
+            </div>
+
+            <button class="btn-sheet" onclick="openSpreadsheet()">📊 Open HR Salary Report</button>
+            <button class="btn-back" onclick="showScreen('screen-main')">Exit Admin</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. SETTINGS 
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3IN_CmLqPSzXtC-y1dNMTe06ulhyFGnHxX2d6AztodlEIE5LCqUR_Wu99IaKfqbhF/exec"; // <-- Masukkan URL dari New Deployment Apps Script
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1zigo7yXkB3CzQRFCxIQTC2KQaTXFQXaYpN4m3xdWZmA/edit?usp=sharing"; 
+        const ADMIN_PIN = "123456"; 
+
+        // ==========================================
+        // 2. ISLAMIC QUOTES ARRAYS
+        // ==========================================
+        const quotesIn = [
+            "“Begin gently, with Bismillah. May Allah bless your effort today.”",
+            "“May your work today be filled with ease and barakah.”",
+            "“Every sincere effort, no matter how small, is seen by Allah.”",
+            "“Start with a pure intention, and let Allah handle the rest.”",
+            "“Do what you can with kindness and trust Allah with the outcome.”",
+            "“Your work is not just for this world, but for your akhirah too.”",
+            "“May Allah grant you strength, patience, and calmness today.”",
+            "“Work with a peaceful heart; Allah is always near.”",
+            "“Take a deep breath, say Bismillah, and begin.”",
+            "“May today’s effort bring goodness to you and others.”",
+            "“Dan katakanlah: Beramallah kamu, maka Allah akan melihat amalan kamu.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 9:105</span>",
+            "“Sesungguhnya Allah bersama orang-orang yang sabar.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:153</span>",
+            "“Barangsiapa bertawakal kepada Allah, maka cukuplah Allah baginya.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 65:3</span>",
+            "“Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:286</span>",
+            "“Dan berbuat baiklah; sesungguhnya Allah menyukai orang-orang yang berbuat baik.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:195</span>",
+            "“Sesungguhnya setiap amalan itu bergantung pada niat.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sahih al-Bukhari 1</span>",
+            "“Sesungguhnya Allah mencintai apabila seseorang melakukan sesuatu pekerjaan, dia melakukannya dengan itqan (bersungguh-sungguh dan terbaik).”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sahih al-Jami' 1880</span>"
+        ];
+
+        const quotesOut = [
+            "“Alhamdulillah for today. May Allah accept your effort.”",
+            "“Rest knowing that Allah sees your sincerity.”",
+            "“You have done your part; leave the results to Allah.”",
+            "“May your hard work return to you as barakah.”",
+            "“End the day with gratitude, and peace will follow.”",
+            "“Every drop of effort counts in the sight of Allah.”",
+            "“May Allah reward you for what others may not see.”",
+            "“Close your day with shukr and a calm heart.”",
+            "“What is written for you will never miss you.”",
+            "“Tomorrow is another chance, in shaa Allah.”",
+            "“Maka ingatlah kepada-Ku, nescaya Aku ingat kepadamu.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:152</span>",
+            "“Sesungguhnya bersama kesulitan itu ada kemudahan.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 94:6</span>",
+            "“Dan Tuhanmu tidaklah lalai terhadap apa yang kamu kerjakan.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 11:123</span>",
+            "“Sebaik-baik manusia adalah yang paling bermanfaat kepada orang lain.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— al-Mu'jam al-Awsat 6192</span>",
+            "“Berikanlah upah kepada pekerja sebelum kering peluhnya.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sunan Ibn Majah 2443</span>",
+            "“Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sahih Muslim 2664</span>"
+        ];
+
+        // ==========================================
+        // 3. DATA, STATUS & OFFLINE QUEUE
+        // ==========================================
+        const defaultEmployees = [
+            "EN TALIB", "EN ABID", "AINA", "IZZLAN", "FAKHRI", 
+            "SHAFUAN", "SYAHMI", "SYARAF", "ZHARFAN", "NAZMI", 
+            "AMIRAH", "IRA", "JIHAN", "SYAFIQAH", "IZZAH", 
+            "NATASYA", "SHAFIRAH", "HAZIQ", "HAJAR", "AIMAN"
+        ];
+        
+        let employees = [];
+        let employeeStatus = {}; 
+        let offlineQueue = [];
+        
+        function loadData() {
+            employees = JSON.parse(localStorage.getItem('harmony_employees')) || [...defaultEmployees];
+            employeeStatus = JSON.parse(localStorage.getItem('harmony_status')) || {};
+            offlineQueue = JSON.parse(localStorage.getItem('harmony_offline_queue')) || [];
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('harmony_employees', JSON.stringify(employees));
+            localStorage.setItem('harmony_status', JSON.stringify(employeeStatus));
+            localStorage.setItem('harmony_offline_queue', JSON.stringify(offlineQueue));
+            renderNameGrid();
+            renderAdminList();
+        }
+
+        // ==========================================
+        // 4. UI RENDERING & CAMERA
+        // ==========================================
+        let currentType = "", currentStaff = "", videoStream = null;
+
+        window.onload = () => { 
+            loadData(); 
+            checkOfflineQueue(); 
+            window.addEventListener('online', checkOfflineQueue); 
+        };
+
+        function renderNameGrid() {
+            const grid = document.getElementById("name-list");
+            grid.innerHTML = "";
+            employees.forEach(name => {
+                const btn = document.createElement("button");
+                btn.className = "btn-name";
+                btn.innerText = name;
+                btn.onclick = () => selectStaff(name);
+                grid.appendChild(btn);
+            });
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.getElementById(screenId).classList.add('active-screen');
+        }
+
+        function selectType(type) {
+            currentType = type;
+            document.getElementById("type-title").innerText = `Clock ${type} - Select Name`;
+            document.getElementById("video-container").style.borderColor = type === 'IN' ? 'var(--color-in)' : 'var(--color-out)';
+            showScreen('screen-names');
+        }
+
+        function selectStaff(name) {
+            currentStaff = name;
+            document.getElementById("staff-name-title").innerText = `${currentStaff} (${currentType})`;
+            showScreen('screen-camera');
+            startCamera();
+        }
+
+        async function startCamera() {
+            const video = document.getElementById('video');
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = videoStream;
+            } catch (err) { Swal.fire('Camera Error', 'Please allow camera access in your browser settings.', 'error'); }
+        }
+
+        function stopCamera() { if (videoStream) videoStream.getTracks().forEach(track => track.stop()); }
+
+        function takeSnapshot() {
+            const canvas = document.getElementById('canvas'), video = document.getElementById('video');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            stopCamera();
+            submitData(canvas.toDataURL('image/jpeg', 0.8));
+        }
+
+        // ==========================================
+        // 5. OFFLINE SYNC & STATUS PUSH (Dah buang Late Flagging)
+        // ==========================================
+        function submitData(imageBase64) {
+            const payload = {
+                staffName: currentStaff,
+                type: currentType,
+                imageBase64: imageBase64,
+                timestamp: new Date().toISOString()
+            };
+
+            // Kalau Offline
+            if (!navigator.onLine) {
+                offlineQueue.push(payload);
+                updateLiveStatus(currentStaff, currentType);
+                saveData();
+                showSuccessPopup("Disimpan (Offline)", "Data akan dihantar bila internet kembali pulih.");
+                return;
+            }
+
+            // Kalau Online
+            Swal.fire({ 
+                title: 'Uploading Data...', 
+                html: '<lottie-player src="https://assets8.lottiefiles.com/packages/lf20_b88nh30c.json" background="transparent" speed="1" style="width: 100px; height: 100px; margin: auto;" loop autoplay></lottie-player>',
+                allowOutsideClick: false, 
+                showConfirmButton: false 
+            });
+
+            fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                updateLiveStatus(currentStaff, currentType);
+                saveData();
+                
+                const quoteList = currentType === 'IN' ? quotesIn : quotesOut;
+                const randomQuote = quoteList[Math.floor(Math.random() * quoteList.length)];
+                
+                showSuccessPopup("Success!", `Record for <b>${currentStaff}</b> has been saved.<hr style="border:0; border-top:1px dashed #cbd5e1; margin:20px 0;"><p style='color:#475569; font-style:italic; font-size:15px; line-height:1.6;'>${randomQuote}</p>`);
+            }).catch(() => {
+                // Fetch gagal (e.g., server timeout), masuk offline queue
+                offlineQueue.push(payload);
+                updateLiveStatus(currentStaff, currentType);
+                saveData();
+                showSuccessPopup("Disimpan (Offline)", "Ralat pelayan. Data disimpan sementara waktu.");
+            });
+        }
+
+        function updateLiveStatus(name, type) {
+            employeeStatus[name] = { status: type }; // isLate dibuang
+        }
+
+        function showSuccessPopup(title, htmlContent) {
+            Swal.fire({
+                html: `
+                    <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json" background="transparent" speed="1" style="width: 130px; height: 130px; margin: auto;" autoplay></lottie-player>
+                    <h2 style="margin-top:0; color: #1e293b;">${title}</h2>
+                    ${htmlContent}
+                `,
+                timer: 6000, 
+                timerProgressBar: true, 
+                showConfirmButton: false
+            }).then(() => showScreen('screen-main'));
+        }
+
+        function checkOfflineQueue() {
+            if (navigator.onLine && offlineQueue.length > 0) {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: `Syncing ${offlineQueue.length} offline records...`, showConfirmButton: false });
+                
+                offlineQueue.forEach((data, index) => {
+                    fetch(SCRIPT_URL, {
+                        method: 'POST', mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    }).then(() => {
+                        offlineQueue.splice(index, 1);
+                        saveData();
+                    });
+                });
+            }
+        }
+
+        // ==========================================
+        // 6. ADMIN PORTAL LOGIC
+        // ==========================================
+        function requestPin() {
+            Swal.fire({
+                title: 'HR Admin Login',
+                input: 'password',
+                inputAttributes: { inputmode: 'numeric', maxlength: 6, placeholder: 'Enter 6-digit PIN' },
+                showCancelButton: true,
+                confirmButtonText: 'Login',
+                confirmButtonColor: '#1e293b'
+            }).then((result) => {
+                if (result.value === ADMIN_PIN) {
+                    showScreen('screen-admin');
+                    renderAdminList();
+                } else if (result.value) {
+                    Swal.fire('Access Denied', 'Incorrect PIN entered.', 'error');
+                }
+            });
+        }
+
+        function renderAdminList() {
+            const listDiv = document.getElementById("admin-employee-list");
+            listDiv.innerHTML = "";
+            employees.forEach((name, index) => {
+                const state = employeeStatus[name] || { status: 'OUT' };
+                const badgeColor = state.status === 'IN' ? '#10b981' : '#94a3b8';
+                const statusHtml = `<span style="color:${badgeColor}; font-size:11px; background:${state.status === 'IN'?'#dcfce7':'#f1f5f9'}; padding:2px 6px; border-radius:10px; margin-left:8px; font-weight:bold;">${state.status === 'IN' ? '🟢 IN' : '⚪ OUT'}</span>`;
+                
+                const item = document.createElement("div");
+                item.className = "admin-item";
+                item.innerHTML = `
+                    <div style="display:flex; align-items:center;">
+                        <span style="font-weight: 500;">${name}</span>
+                        ${statusHtml}
+                    </div>
+                    <button class="btn-delete" onclick="removeEmployee(${index})">Delete</button>
+                `;
+                listDiv.appendChild(item);
+            });
+        }
+
+        function addEmployee() {
+            const input = document.getElementById("new-employee-name");
+            const name = input.value.trim().toUpperCase();
+            if (name && !employees.includes(name)) {
+                employees.push(name);
+                saveData();
+                input.value = "";
+                Swal.fire({icon: 'success', title: 'Added', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
+            } else if (employees.includes(name)) {
+                Swal.fire('Error', 'Name already exists in the list.', 'warning');
+            }
+        }
+
+        function removeEmployee(index) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: employees[index] + " will be removed from the Kiosk list.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Yes, Delete'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    employees.splice(index, 1);
+                    saveData();
+                }
+            });
+        }
+
+        function openSpreadsheet() { window.open(SHEET_URL, '_blank'); }
+    </script>
+</body>
+</html>
