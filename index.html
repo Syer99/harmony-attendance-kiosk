@@ -71,171 +71,97 @@
             align-self: center;
         }
 
-        /* --- REAL-TIME CLOCK STYLES --- */
-        .clock-container {
-            margin-bottom: 30px;
-        }
-        .clock-time {
-            font-size: 48px; 
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.1;
-            letter-spacing: -0.5px;
-        }
-        .clock-date {
-            font-size: 14px;
-            color: #64748b;
-            font-weight: 500;
-            margin-top: 5px;
-        }
+        .clock-container { margin-bottom: 30px; }
+        .clock-time { font-size: 48px; font-weight: 700; color: var(--text-main); line-height: 1.1; letter-spacing: -0.5px; }
+        .clock-date { font-size: 14px; color: #64748b; font-weight: 500; margin-top: 5px; }
 
         h2 { margin-top: 0; font-weight: 600; font-size: 22px;}
         p { color: #64748b; margin-bottom: 25px; font-size: 15px;}
 
-        /* --- NEW PROFESSIONAL BUTTONS --- */
         .btn-main {
-            width: 100%;
-            padding: 18px 24px;
-            margin: 12px 0; 
-            border: none;
-            border-radius: 16px;
-            font-size: 18px; 
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%; padding: 18px 24px; margin: 12px 0; border: none; border-radius: 16px;
+            font-size: 18px; font-weight: 600; color: white; cursor: pointer; transition: all 0.3s ease;
+            position: relative; overflow: hidden; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center;
         }
 
-        .btn-in {
-            background: linear-gradient(135deg, var(--color-in-start) 0%, var(--color-in-end) 100%);
-            box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.4);
-        }
-
-        .btn-out {
-            background: linear-gradient(135deg, var(--color-out-start) 0%, var(--color-out-end) 100%);
-            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
-        }
+        .btn-in { background: linear-gradient(135deg, var(--color-in-start) 0%, var(--color-in-end) 100%); box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.4); }
+        .btn-out { background: linear-gradient(135deg, var(--color-out-start) 0%, var(--color-out-end) 100%); box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); }
 
         .btn-main:hover { transform: translateY(-3px); }
         .btn-in:hover { box-shadow: 0 15px 30px -5px rgba(5, 150, 105, 0.6); }
         .btn-out:hover { box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6); }
 
-        .btn-main:active {
-            transform: scale(0.98) translateY(0);
-            box-shadow: 0 5px 10px -5px rgba(0,0,0,0.2);
-        }
+        .btn-main:active { transform: scale(0.98) translateY(0); box-shadow: 0 5px 10px -5px rgba(0,0,0,0.2); }
 
-        /* --- NAME GRID --- */
         .name-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 10px;
-            overflow-y: auto;
-            padding: 5px;
-            max-height: 55vh;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;
+            overflow-y: auto; padding: 5px; max-height: 55vh;
         }
 
         .btn-name {
-            background: #ffffff;
-            border: 1px solid #e2e8f0; 
-            padding: 15px 10px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            color: var(--text-main);
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
+            background: #ffffff; border: 1px solid #e2e8f0; padding: 15px 10px; border-radius: 12px;
+            font-size: 15px; font-weight: 500; cursor: pointer; color: var(--text-main);
+            transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
         }
 
         .btn-name:active, .btn-name:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        /* --- CAMERA & OTHER BUTTONS --- */
+        /* NEW STYLE: DISABLED BUTTON FOR BLOCKED ATTEMPTS */
+        .btn-disabled {
+            background: #f1f5f9 !important;
+            color: #cbd5e1 !important;
+            border-color: #f1f5f9 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
         #video-container {
-            width: 260px; 
-            height: 260px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin: 0 auto 25px;
-            border: 4px solid #f1f5f9;
-            background: #000;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 260px; height: 260px; border-radius: 50%; overflow: hidden; margin: 0 auto 25px;
+            border: 4px solid #f1f5f9; background: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
         video { width: 100%; height: 100%; object-fit: cover; }
         canvas { display: none; }
 
         .btn-snap {
-            background: var(--text-main);
-            color: white; border: none; padding: 16px 35px; border-radius: 30px; 
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15); transition: all 0.2s;
+            background: var(--text-main); color: white; border: none; padding: 16px 35px; border-radius: 30px; 
+            font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.15); transition: all 0.2s;
         }
         .btn-snap:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .btn-snap:active { transform: scale(0.98); }
 
         .btn-back {
-            background: transparent; border: none; color: #94a3b8;
-            font-size: 15px; margin-top: 20px; cursor: pointer; text-decoration: none; 
-            display: flex; align-items: center; justify-content: center; gap: 5px;
+            background: transparent; border: none; color: #94a3b8; font-size: 15px; margin-top: 20px; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
         .btn-back:hover { color: var(--text-main); }
 
         .btn-admin-trigger {
             position: absolute; bottom: 20px; right: 20px; width: 45px; height: 45px;
-            background: white; border: 1px solid #e2e8f0; border-radius: 50%;
-            color: #94a3b8; font-size: 20px; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+            background: white; border: 1px solid #e2e8f0; border-radius: 50%; color: #94a3b8; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
         .btn-admin-trigger:hover { box-shadow: 0 6px 15px rgba(0,0,0,0.1); color: var(--text-main); }
         .btn-admin-trigger:active { transform: scale(0.9); }
 
         /* --- DASHBOARD ADMIN STYLES --- */
-        .dash-cards {
-            display: flex; gap: 12px; margin-bottom: 25px;
-        }
-        .dash-card {
-            flex: 1; background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; 
-            padding: 15px 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.2s;
-        }
+        .dash-cards { display: flex; gap: 12px; margin-bottom: 25px; }
+        .dash-card { flex: 1; background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; padding: 15px 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.2s; }
         .dash-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
         .dash-card h3 { margin: 0; font-size: 26px; font-weight: 700; }
         .dash-card p { margin: 5px 0 0; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-        
         .dash-total h3 { color: var(--text-main); }
         .dash-in h3 { background: linear-gradient(135deg, var(--color-in-start), var(--color-in-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .dash-out h3 { color: #cbd5e1; }
 
-        .admin-list {
-            text-align: left; overflow-y: auto; max-height: 35vh; margin-bottom: 15px;
-            border: 1px solid #f1f5f9; border-radius: 12px; padding: 5px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .admin-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 15px; border-bottom: 1px solid #f1f5f9;
-        }
+        .admin-list { text-align: left; overflow-y: auto; max-height: 35vh; margin-bottom: 15px; border: 1px solid #f1f5f9; border-radius: 12px; padding: 5px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; }
         .admin-item:last-child { border-bottom: none; }
-        .btn-delete {
-            background: #fee2e2; color: var(--color-danger); border: none;
-            padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;
-        }
+        .btn-delete { background: #fee2e2; color: var(--color-danger); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
         .btn-delete:hover { background: #fecaca; }
         .admin-inputs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .admin-inputs input {
-            flex: 1; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: 'Poppins'; outline: none; transition: border 0.2s;
-        }
+        .admin-inputs input { flex: 1; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: 'Poppins'; outline: none; transition: border 0.2s; }
         .admin-inputs input:focus { border-color: var(--color-out-end); }
         .btn-add { background: var(--text-main); color: white; border: none; padding: 0 25px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s;}
         .btn-add:hover { opacity: 0.9; transform: translateY(-1px);}
@@ -248,18 +174,12 @@
     <div id="screen-main" class="screen active-screen">
         <div class="clean-panel">
             <img src="harmony_logo.png" alt="Harmony Logo" class="company-logo" id="company-logo">
-            
             <div class="clock-container">
                 <div class="clock-time" id="realtime-clock">00:00 AM</div>
                 <div class="clock-date" id="realtime-date">Loading date...</div>
             </div>
-
-            <button class="btn-main btn-in" onclick="selectType('IN')">
-                <span>CLOCK IN</span>
-            </button>
-            <button class="btn-main btn-out" onclick="selectType('OUT')">
-                <span>CLOCK OUT</span>
-            </button>
+            <button class="btn-main btn-in" onclick="selectType('IN')"><span>CLOCK IN</span></button>
+            <button class="btn-main btn-out" onclick="selectType('OUT')"><span>CLOCK OUT</span></button>
         </div>
         <button class="btn-admin-trigger" onclick="requestPin()">⚙️</button>
     </div>
@@ -276,12 +196,8 @@
         <div class="clean-panel">
             <h2 id="staff-name-title">Staff Name</h2>
             <p>Please look at the camera</p>
-            
-            <div id="video-container">
-                <video id="video" autoplay playsinline></video>
-            </div>
+            <div id="video-container"><video id="video" autoplay playsinline></video></div>
             <canvas id="canvas"></canvas>
-            
             <button class="btn-snap" onclick="takeSnapshot()">SNAP & SUBMIT</button>
             <button class="btn-back" onclick="stopCamera(); showScreen('screen-names')">← Back</button>
         </div>
@@ -290,29 +206,16 @@
     <div id="screen-admin" class="screen">
         <div class="clean-panel">
             <h2>HR Dashboard</h2>
-            
             <div class="dash-cards">
-                <div class="dash-card dash-total">
-                    <h3 id="stat-total">0</h3>
-                    <p>Total Staff</p>
-                </div>
-                <div class="dash-card dash-in">
-                    <h3 id="stat-in">0</h3>
-                    <p>Present</p>
-                </div>
-                <div class="dash-card dash-out">
-                    <h3 id="stat-out">0</h3>
-                    <p>Absent</p>
-                </div>
+                <div class="dash-card dash-total"><h3 id="stat-total">0</h3><p>Total Staff</p></div>
+                <div class="dash-card dash-in"><h3 id="stat-in">0</h3><p>Present</p></div>
+                <div class="dash-card dash-out"><h3 id="stat-out">0</h3><p>Absent</p></div>
             </div>
-            
             <div class="admin-list" id="admin-employee-list"></div>
-
             <div class="admin-inputs">
                 <input type="text" id="new-employee-name" placeholder="New Staff Name..." autocomplete="off">
                 <button class="btn-add" onclick="addEmployee()">Add</button>
             </div>
-
             <button class="btn-sheet" onclick="openSpreadsheet()">📊 Open HR Sheets</button>
             <button class="btn-back" onclick="showScreen('screen-main')">← Exit Dashboard</button>
         </div>
@@ -322,12 +225,12 @@
         // ==========================================
         // 1. SETTINGS 
         // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwB5JJ9RHaNw0n8xP_Y0AHbHqoDNIsXpI-4xfCYqWRgOjuP5Ot3-6kjBNptYeAaoDF/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq7CBy2B99b6CdQ3DCBwpD_KFM99rZjhM7PTorUdkxZGsUNef675ParOGQpLZzyCOv/exec"; 
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/1zigo7yXkB3CzQRFCxIQTC2KQaTXFQXaYpN4m3xdWZmA/edit?usp=sharing"; 
         const ADMIN_PIN = "123456"; 
 
         // ==========================================
-        // 2. ISLAMIC QUOTES ARRAYS (FULL VERSION)
+        // 2. ISLAMIC QUOTES ARRAYS (FULL)
         // ==========================================
         const quotesIn = [
             "“Begin gently, with Bismillah. May Allah bless your effort today.”",
@@ -369,21 +272,20 @@
         ];
 
         // ==========================================
-        // 3. REAL TIME CLOCK FUNCTION
+        // 3. REAL TIME CLOCK 
         // ==========================================
         function startClock() {
             setInterval(() => {
                 const now = new Date();
                 const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
                 const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                
                 document.getElementById('realtime-clock').innerText = now.toLocaleTimeString('en-US', timeOptions);
                 document.getElementById('realtime-date').innerText = now.toLocaleDateString('en-US', dateOptions);
             }, 1000);
         }
 
         // ==========================================
-        // 4. DATA, STATUS & OFFLINE QUEUE (FULL 20 NAMES)
+        // 4. DATA, STATUS & OFFLINE QUEUE
         // ==========================================
         const defaultEmployees = [
             "EN TALIB", "EN ABID", "AINA", "IZZLAN", "FAKHRI", 
@@ -407,12 +309,11 @@
             localStorage.setItem('harmony_employees', JSON.stringify(employees));
             localStorage.setItem('harmony_status', JSON.stringify(employeeStatus));
             localStorage.setItem('harmony_offline_queue', JSON.stringify(offlineQueue));
-            renderNameGrid();
             renderAdminList();
         }
 
         // ==========================================
-        // 5. UI RENDERING & CAMERA
+        // 5. UI RENDERING & BLOCKING LOGIC
         // ==========================================
         let currentType = "", currentStaff = "", videoStream = null;
 
@@ -423,14 +324,32 @@
             window.addEventListener('online', checkOfflineQueue); 
         };
 
-        function renderNameGrid() {
+        // Render grid based on chosen type to block duplicate attempts
+        function renderNameGrid(filterType) {
             const grid = document.getElementById("name-list");
             grid.innerHTML = "";
             employees.forEach(name => {
                 const btn = document.createElement("button");
-                btn.className = "btn-name";
                 btn.innerText = name;
-                btn.onclick = () => selectStaff(name);
+                
+                // Check current status of the employee
+                const state = employeeStatus[name] ? employeeStatus[name].status : 'OUT';
+                let isDisabled = false;
+
+                // Logic: Block IN if already IN. Block OUT if already OUT.
+                if (filterType === 'IN' && state === 'IN') isDisabled = true;
+                if (filterType === 'OUT' && state === 'OUT') isDisabled = true;
+
+                if (isDisabled) {
+                    btn.className = "btn-name btn-disabled";
+                    btn.onclick = () => {
+                        Swal.fire('Access Denied', `You are currently clocked ${state}. Please select the correct action.`, 'warning');
+                    };
+                } else {
+                    btn.className = "btn-name";
+                    btn.onclick = () => selectStaff(name);
+                }
+                
                 grid.appendChild(btn);
             });
         }
@@ -444,6 +363,8 @@
             currentType = type;
             document.getElementById("type-title").innerText = `Clock ${type} - Select Name`;
             document.getElementById("video-container").style.borderColor = type === 'IN' ? 'var(--color-in-end)' : 'var(--color-out-end)';
+            
+            renderNameGrid(type); // Draw names with blocking logic
             showScreen('screen-names');
         }
 
@@ -481,7 +402,7 @@
             if (!navigator.onLine) {
                 offlineQueue.push(payload);
                 updateLiveStatus(currentStaff, currentType);
-                showSuccessPopup("Disimpan (Offline)", "Data akan dihantar bila internet pulih.");
+                showSuccessPopup("Saved (Offline)", "Data will be synced when connection is restored.");
                 return;
             }
 
@@ -497,7 +418,7 @@
             }).catch(() => {
                 offlineQueue.push(payload);
                 updateLiveStatus(currentStaff, currentType);
-                showSuccessPopup("Disimpan (Offline)", "Ralat pelayan. Data disimpan sementara.");
+                showSuccessPopup("Saved (Offline)", "Server error. Data temporarily saved.");
             });
         }
 
@@ -546,11 +467,10 @@
                 
                 const item = document.createElement("div");
                 item.className = "admin-item";
-                item.innerHTML = `<div style="display:flex; align-items:center;"><span style="font-weight: 500;">${name}</span>${statusHtml}</div><button class="btn-delete" onclick="removeEmployee(${index})">Del</button>`;
+                item.innerHTML = `<div style="display:flex; align-items:center;"><span style="font-weight: 500;">${name}</span>${statusHtml}</div><button class="btn-delete" onclick="removeEmployee(${index})">Delete</button>`;
                 listDiv.appendChild(item);
             });
 
-            // Update Quick Stats Dashboard
             document.getElementById("stat-total").innerText = employees.length;
             document.getElementById("stat-in").innerText = totalIn;
             document.getElementById("stat-out").innerText = totalOut;
@@ -561,7 +481,7 @@
             const name = input.value.trim().toUpperCase();
             if (name && !employees.includes(name)) {
                 employees.push(name); saveData(); input.value = "";
-                Swal.fire({icon: 'success', title: 'Added', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
+                Swal.fire({icon: 'success', title: 'Added Successfully', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
             } else if (employees.includes(name)) { Swal.fire('Error', 'Name already exists.', 'warning'); }
         }
 
