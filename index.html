@@ -394,10 +394,17 @@
         }
 
         // ==========================================
-        // 6. SEND DATA & SYNC
+        // 6. SEND DATA & SYNC (DAH DIPERBAIKI)
         // ==========================================
         function submitData(imageBase64) {
-            const payload = { staffName: currentStaff, type: currentType, imageBase64: imageBase64, timestamp: new Date().toISOString() };
+            // KESILAPAN SEBELUM NI DI SINI: Tertinggal action: "kiosk_punch"
+            const payload = { 
+                action: "kiosk_punch", 
+                staffName: currentStaff, 
+                type: currentType, 
+                imageBase64: imageBase64, 
+                timestamp: new Date().toISOString() 
+            };
 
             if (!navigator.onLine) {
                 offlineQueue.push(payload);
@@ -408,8 +415,12 @@
 
             Swal.fire({ title: 'Uploading Data...', html: '<lottie-player src="https://assets8.lottiefiles.com/packages/lf20_b88nh30c.json" background="transparent" speed="1" style="width: 100px; height: 100px; margin: auto;" loop autoplay></lottie-player>', allowOutsideClick: false, showConfirmButton: false });
 
+            // PASTIKAN Content-Type ditukar kepada text/plain untuk elak halangan browser
             fetch(SCRIPT_URL, {
-                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                method: 'POST', 
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'text/plain' }, 
+                body: JSON.stringify(payload)
             }).then(() => {
                 updateLiveStatus(currentStaff, currentType);
                 const quoteList = currentType === 'IN' ? quotesIn : quotesOut;
@@ -420,24 +431,6 @@
                 updateLiveStatus(currentStaff, currentType);
                 showSuccessPopup("Saved (Offline)", "Server error. Data temporarily saved.");
             });
-        }
-
-        function updateLiveStatus(name, type) {
-            employeeStatus[name] = { status: type }; 
-            saveData();
-        }
-
-        function showSuccessPopup(title, htmlContent) {
-            Swal.fire({ html: `<lottie-player src="https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json" background="transparent" speed="1" style="width: 130px; height: 130px; margin: auto;" autoplay></lottie-player><h2 style="margin-top:0;">${title}</h2>${htmlContent}`, timer: 6000, timerProgressBar: true, showConfirmButton: false }).then(() => showScreen('screen-main'));
-        }
-
-        function checkOfflineQueue() {
-            if (navigator.onLine && offlineQueue.length > 0) {
-                offlineQueue.forEach((data, index) => {
-                    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-                    .then(() => { offlineQueue.splice(index, 1); saveData(); });
-                });
-            }
         }
 
         // ==========================================
