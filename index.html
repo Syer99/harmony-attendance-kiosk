@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Staff Attendance Portal</title>
+    <title>Staff Attendance Kiosk</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    
+
     <style>
         :root {
-            --color-in-start: #34d399; 
-            --color-in-end: #059669;   
-            --color-out-start: #60a5fa; 
-            --color-out-end: #2563eb;   
-            --color-danger: #ef4444; 
+            --color-in-start: #34d399;
+            --color-in-end: #059669;
+            --color-out-start: #60a5fa;
+            --color-out-end: #2563eb;
+            --color-danger: #ef4444;
             --text-main: #1e293b;
         }
 
@@ -22,7 +21,7 @@
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #ffffff; 
+            background-color: #ffffff;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -36,18 +35,16 @@
             width: 100%;
             max-width: 480px;
             height: 100%;
-            padding: 25px; 
+            padding: 25px;
             box-sizing: border-box;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
-            background: #ffffff; 
+            animation: fadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: #ffffff;
         }
 
-        .active-screen {
-            display: flex;
-        }
+        .active-screen { display: flex; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -60,11 +57,11 @@
             display: flex;
             flex-direction: column;
             max-height: 95vh;
-            padding: 10px 0; 
+            padding: 10px 0;
         }
 
         .company-logo {
-            max-width: 140px; 
+            max-width: 140px;
             max-height: 90px;
             margin-bottom: 15px;
             object-fit: contain;
@@ -75,8 +72,15 @@
         .clock-time { font-size: 48px; font-weight: 700; color: var(--text-main); line-height: 1.1; letter-spacing: -0.5px; }
         .clock-date { font-size: 14px; color: #64748b; font-weight: 500; margin-top: 5px; }
 
-        h2 { margin-top: 0; font-weight: 600; font-size: 22px;}
-        p { color: #64748b; margin-bottom: 25px; font-size: 15px;}
+        .conn-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+            color: #94a3b8; margin-top: 8px;
+        }
+        .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+        .conn-dot.offline { background: #ef4444; }
+
+        h2 { margin-top: 0; font-weight: 600; font-size: 22px; }
+        p { color: #64748b; margin-bottom: 25px; font-size: 15px; }
 
         .btn-main {
             width: 100%; padding: 18px 24px; margin: 12px 0; border: none; border-radius: 16px;
@@ -90,7 +94,6 @@
         .btn-main:hover { transform: translateY(-3px); }
         .btn-in:hover { box-shadow: 0 15px 30px -5px rgba(5, 150, 105, 0.6); }
         .btn-out:hover { box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6); }
-
         .btn-main:active { transform: scale(0.98) translateY(0); box-shadow: 0 5px 10px -5px rgba(0,0,0,0.2); }
 
         .name-grid {
@@ -101,21 +104,11 @@
         .btn-name {
             background: #ffffff; border: 1px solid #e2e8f0; padding: 15px 10px; border-radius: 12px;
             font-size: 15px; font-weight: 500; cursor: pointer; color: var(--text-main);
-            transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
+            transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
         .btn-name:active, .btn-name:hover {
             background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        /* NEW STYLE: DISABLED BUTTON FOR BLOCKED ATTEMPTS */
-        .btn-disabled {
-            background: #f1f5f9 !important;
-            color: #cbd5e1 !important;
-            border-color: #f1f5f9 !important;
-            cursor: not-allowed !important;
-            box-shadow: none !important;
-            transform: none !important;
         }
 
         #video-container {
@@ -127,46 +120,24 @@
         canvas { display: none; }
 
         .btn-snap {
-            background: var(--text-main); color: white; border: none; padding: 16px 35px; border-radius: 30px; 
+            background: var(--text-main); color: white; border: none; padding: 16px 35px; border-radius: 30px;
             font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.15); transition: all 0.2s;
+            width: 100%;
         }
         .btn-snap:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .btn-snap:active { transform: scale(0.98); }
+        .btn-snap:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .btn-back {
-            background: transparent; border: none; color: #94a3b8; font-size: 15px; margin-top: 20px; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;
+            background: transparent; border: none; color: #94a3b8; font-size: 15px; margin-top: 20px; cursor: pointer;
+            text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
         .btn-back:hover { color: var(--text-main); }
 
-        .btn-admin-trigger {
-            position: absolute; bottom: 20px; right: 20px; width: 45px; height: 45px;
-            background: white; border: 1px solid #e2e8f0; border-radius: 50%; color: #94a3b8; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        .pending-badge {
+            position: absolute; top: 20px; right: 20px; background: #fef3c7; color: #b45309;
+            font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; display: none;
         }
-        .btn-admin-trigger:hover { box-shadow: 0 6px 15px rgba(0,0,0,0.1); color: var(--text-main); }
-        .btn-admin-trigger:active { transform: scale(0.9); }
-
-        /* --- DASHBOARD ADMIN STYLES --- */
-        .dash-cards { display: flex; gap: 12px; margin-bottom: 25px; }
-        .dash-card { flex: 1; background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; padding: 15px 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.2s; }
-        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-        .dash-card h3 { margin: 0; font-size: 26px; font-weight: 700; }
-        .dash-card p { margin: 5px 0 0; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-        .dash-total h3 { color: var(--text-main); }
-        .dash-in h3 { background: linear-gradient(135deg, var(--color-in-start), var(--color-in-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .dash-out h3 { color: #cbd5e1; }
-
-        .admin-list { text-align: left; overflow-y: auto; max-height: 35vh; margin-bottom: 15px; border: 1px solid #f1f5f9; border-radius: 12px; padding: 5px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; }
-        .admin-item:last-child { border-bottom: none; }
-        .btn-delete { background: #fee2e2; color: var(--color-danger); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
-        .btn-delete:hover { background: #fecaca; }
-        .admin-inputs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .admin-inputs input { flex: 1; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: 'Poppins'; outline: none; transition: border 0.2s; }
-        .admin-inputs input:focus { border-color: var(--color-out-end); }
-        .btn-add { background: var(--text-main); color: white; border: none; padding: 0 25px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s;}
-        .btn-add:hover { opacity: 0.9; transform: translateY(-1px);}
-        .btn-sheet { background: linear-gradient(135deg, var(--color-in-start), var(--color-in-end)); color: white; width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(5, 150, 105, 0.2);}
-        .btn-sheet:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4); }
     </style>
 </head>
 <body>
@@ -177,11 +148,12 @@
             <div class="clock-container">
                 <div class="clock-time" id="realtime-clock">00:00 AM</div>
                 <div class="clock-date" id="realtime-date">Loading date...</div>
+                <div class="conn-badge"><span class="conn-dot" id="conn-dot"></span><span id="conn-text">Online</span></div>
             </div>
             <button class="btn-main btn-in" onclick="selectType('IN')"><span>CLOCK IN</span></button>
             <button class="btn-main btn-out" onclick="selectType('OUT')"><span>CLOCK OUT</span></button>
         </div>
-        <button class="btn-admin-trigger" onclick="requestPin()">⚙️</button>
+        <div class="pending-badge" id="pending-badge">0 belum hantar</div>
     </div>
 
     <div id="screen-names" class="screen">
@@ -196,160 +168,130 @@
         <div class="clean-panel">
             <h2 id="staff-name-title">Staff Name</h2>
             <p>Please look at the camera</p>
-            <div id="video-container"><video id="video" autoplay playsinline></video></div>
+            <div id="video-container"><video id="video" autoplay playsinline muted></video></div>
             <canvas id="canvas"></canvas>
-            <button class="btn-snap" onclick="takeSnapshot()">SNAP & SUBMIT</button>
+            <button class="btn-snap" id="btn-snap" onclick="takeSnapshot()">SNAP &amp; SUBMIT</button>
             <button class="btn-back" onclick="stopCamera(); showScreen('screen-names')">← Back</button>
-        </div>
-    </div>
-
-    <div id="screen-admin" class="screen">
-        <div class="clean-panel">
-            <h2>HR Dashboard</h2>
-            <div class="dash-cards">
-                <div class="dash-card dash-total"><h3 id="stat-total">0</h3><p>Total Staff</p></div>
-                <div class="dash-card dash-in"><h3 id="stat-in">0</h3><p>Present</p></div>
-                <div class="dash-card dash-out"><h3 id="stat-out">0</h3><p>Absent</p></div>
-            </div>
-            <div class="admin-list" id="admin-employee-list"></div>
-            <div class="admin-inputs">
-                <input type="text" id="new-employee-name" placeholder="New Staff Name..." autocomplete="off">
-                <button class="btn-add" onclick="addEmployee()">Add</button>
-            </div>
-            <button class="btn-sheet" onclick="openSpreadsheet()">📊 Open HR Sheets</button>
-            <button class="btn-back" onclick="showScreen('screen-main')">← Exit Dashboard</button>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 1. SETTINGS 
+        // 1. SETTINGS — TUKAR URL INI SELEPAS DEPLOY APPS SCRIPT
         // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDmc2MieuuiwpfWOlqaG0JJQf1iDgoCiT9Lu2elOYzn__VfdqmQl_OhegOVl5mPt3L2Q/exec"; 
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1wBrQGYcc454NrJrLrPRW8FSp1W3udxRVRS5NrMuXkyQ/edit?usp=sharing"; 
-        const ADMIN_PIN = "123456"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDmc2MieuuiwpfWOlqaG0JJQf1iDgoCiT9Lu2elOYzn__VfdqmQl_OhegOVl5mPt3L2Q/exec";
 
         // ==========================================
-        // 2. ISLAMIC QUOTES ARRAYS (FULL)
+        // 2. STAFF LIST (edit terus di sini, tanpa dashboard admin)
         // ==========================================
-        const quotesIn = [
-            "“Begin gently, with Bismillah. May Allah bless your effort today.”",
-            "“May your work today be filled with ease and barakah.”",
-            "“Every sincere effort, no matter how small, is seen by Allah.”",
-            "“Start with a pure intention, and let Allah handle the rest.”",
-            "“Do what you can with kindness and trust Allah with the outcome.”",
-            "“Your work is not just for this world, but for your akhirah too.”",
-            "“May Allah grant you strength, patience, and calmness today.”",
-            "“Work with a peaceful heart; Allah is always near.”",
-            "“Take a deep breath, say Bismillah, and begin.”",
-            "“May today’s effort bring goodness to you and others.”",
-            "“Dan katakanlah: Beramallah kamu, maka Allah akan melihat amalan kamu.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 9:105</span>",
-            "“Sesungguhnya Allah bersama orang-orang yang sabar.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:153</span>",
-            "“Barangsiapa bertawakal kepada Allah, maka cukuplah Allah baginya.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 65:3</span>",
-            "“Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:286</span>",
-            "“Dan berbuat baiklah; sesungguhnya Allah menyukai orang-orang yang berbuat baik.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:195</span>",
-            "“Sesungguhnya setiap amalan itu bergantung pada niat.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sahih al-Bukhari 1</span>",
-            "“Sesungguhnya Allah mencintai apabila seseorang melakukan sesuatu pekerjaan, dia melakukannya dengan itqan (bersungguh-sungguh dan terbaik).”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sahih al-Jami' 1880</span>"
-        ];
-
-        const quotesOut = [
-            "“Alhamdulillah for today. May Allah accept your effort.”",
-            "“Rest knowing that Allah sees your sincerity.”",
-            "“You have done your part; leave the results to Allah.”",
-            "“May your hard work return to you as barakah.”",
-            "“End the day with gratitude, and peace will follow.”",
-            "“Every drop of effort counts in the sight of Allah.”",
-            "“May Allah reward you for what others may not see.”",
-            "“Close your day with shukr and a calm heart.”",
-            "“What is written for you will never miss you.”",
-            "“Tomorrow is another chance, in shaa Allah.”",
-            "“Maka ingatlah kepada-Ku, nescaya Aku ingat kepadamu.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 2:152</span>",
-            "“Sesungguhnya bersama kesulitan itu ada kemudahan.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 94:6</span>",
-            "“Dan Tuhanmu tidaklah lalai terhadap apa yang kamu kerjakan.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Qur'an 11:123</span>",
-            "“Sebaik-baik manusia adalah yang paling bermanfaat kepada orang lain.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— al-Mu'jam al-Awsat 6192</span>",
-            "“Berikanlah upah kepada pekerja sebelum kering peluhnya.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sunan Ibn Majah 2443</span>",
-            "“Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.”<br><span style='font-size:12px; font-weight:600; color:#94a3b8;'>— Sahih Muslim 2664</span>"
+        const employees = [
+            "EN TALIB", "EN ABID", "AINA", "IZZLAN", "FAKHRI",
+            "SHAFUAN", "SYAHMI", "SYARAF", "ZHARFAN", "NAZMI",
+            "AMIRAH", "IRA", "JIHAN", "SYAFIQAH", "IZZAH",
+            "NATASYA", "SHAFIRAH", "HAZIQ", "HAJAR", "AIMAN"
         ];
 
         // ==========================================
-        // 3. REAL TIME CLOCK 
+        // 3. REAL TIME CLOCK
         // ==========================================
         function startClock() {
-            setInterval(() => {
+            const tick = () => {
                 const now = new Date();
-                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
                 const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 document.getElementById('realtime-clock').innerText = now.toLocaleTimeString('en-US', timeOptions);
                 document.getElementById('realtime-date').innerText = now.toLocaleDateString('en-US', dateOptions);
-            }, 1000);
+            };
+            tick();
+            setInterval(tick, 1000);
         }
 
         // ==========================================
-        // 4. DATA, STATUS & OFFLINE QUEUE
+        // 4. OFFLINE QUEUE (localStorage) — pastikan data tak hilang
         // ==========================================
-        const defaultEmployees = [
-            "EN TALIB", "EN ABID", "AINA", "IZZLAN", "FAKHRI", 
-            "SHAFUAN", "SYAHMI", "SYARAF", "ZHARFAN", "NAZMI", 
-            "AMIRAH", "IRA", "JIHAN", "SYAFIQAH", "IZZAH", 
-            "NATASYA", "SHAFIRAH", "HAZIQ", "HAJAR", "AIMAN"
-        ];
-        
-        let employees = [];
-        let employeeStatus = {}; 
         let offlineQueue = [];
-        
-        function loadData() {
-            employees = JSON.parse(localStorage.getItem('harmony_employees')) || [...defaultEmployees];
-            employeeStatus = JSON.parse(localStorage.getItem('harmony_status')) || {};
-            offlineQueue = JSON.parse(localStorage.getItem('harmony_offline_queue')) || [];
-            saveData();
+
+        function loadQueue() {
+            try {
+                offlineQueue = JSON.parse(localStorage.getItem('attendance_offline_queue')) || [];
+            } catch (e) {
+                offlineQueue = [];
+            }
+            updatePendingBadge();
         }
 
-        function saveData() {
-            localStorage.setItem('harmony_employees', JSON.stringify(employees));
-            localStorage.setItem('harmony_status', JSON.stringify(employeeStatus));
-            localStorage.setItem('harmony_offline_queue', JSON.stringify(offlineQueue));
-            renderAdminList();
+        function saveQueue() {
+            localStorage.setItem('attendance_offline_queue', JSON.stringify(offlineQueue));
+            updatePendingBadge();
+        }
+
+        function updatePendingBadge() {
+            const badge = document.getElementById('pending-badge');
+            if (offlineQueue.length > 0) {
+                badge.style.display = 'block';
+                badge.innerText = offlineQueue.length + ' belum hantar';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateConnBadge() {
+            const dot = document.getElementById('conn-dot');
+            const text = document.getElementById('conn-text');
+            if (navigator.onLine) {
+                dot.classList.remove('offline');
+                text.innerText = 'Online';
+            } else {
+                dot.classList.add('offline');
+                text.innerText = 'Offline (akan auto-sync)';
+            }
+        }
+
+        // Cuba hantar semula apa-apa rekod yang tersangkut di queue
+        async function flushQueue() {
+            if (!navigator.onLine || offlineQueue.length === 0) return;
+
+            const remaining = [];
+            for (const payload of offlineQueue) {
+                const ok = await sendToServer(payload);
+                if (!ok) remaining.push(payload);
+            }
+            offlineQueue = remaining;
+            saveQueue();
+        }
+
+        // Hantar satu payload ke Apps Script. Pulangkan true jika berjaya hantar.
+        function sendToServer(payload) {
+            return fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // wajib utk Apps Script web app dari browser tanpa CORS preflight
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            }).then(() => true).catch(() => false);
         }
 
         // ==========================================
-        // 5. UI RENDERING & BLOCKING LOGIC
+        // 5. UI RENDERING
         // ==========================================
         let currentType = "", currentStaff = "", videoStream = null;
 
-        window.onload = () => { 
+        window.onload = () => {
             startClock();
-            loadData(); 
-            checkOfflineQueue(); 
-            window.addEventListener('online', checkOfflineQueue); 
+            loadQueue();
+            updateConnBadge();
+            flushQueue();
+            window.addEventListener('online', () => { updateConnBadge(); flushQueue(); });
+            window.addEventListener('offline', updateConnBadge);
         };
 
-        // Render grid based on chosen type to block duplicate attempts
-        function renderNameGrid(filterType) {
+        function renderNameGrid() {
             const grid = document.getElementById("name-list");
             grid.innerHTML = "";
             employees.forEach(name => {
                 const btn = document.createElement("button");
                 btn.innerText = name;
-                
-                // Check current status of the employee
-                const state = employeeStatus[name] ? employeeStatus[name].status : 'OUT';
-                let isDisabled = false;
-
-                // Logic: Block IN if already IN. Block OUT if already OUT.
-                if (filterType === 'IN' && state === 'IN') isDisabled = true;
-                if (filterType === 'OUT' && state === 'OUT') isDisabled = true;
-
-                if (isDisabled) {
-                    btn.className = "btn-name btn-disabled";
-                    btn.onclick = () => {
-                        Swal.fire('Access Denied', `You are currently clocked ${state}. Please select the correct action.`, 'warning');
-                    };
-                } else {
-                    btn.className = "btn-name";
-                    btn.onclick = () => selectStaff(name);
-                }
-                
+                btn.className = "btn-name";
+                btn.onclick = () => selectStaff(name);
                 grid.appendChild(btn);
             });
         }
@@ -362,15 +304,15 @@
         function selectType(type) {
             currentType = type;
             document.getElementById("type-title").innerText = `Clock ${type} - Select Name`;
-            document.getElementById("video-container").style.borderColor = type === 'IN' ? 'var(--color-in-end)' : 'var(--color-out-end)';
-            
-            renderNameGrid(type); // Draw names with blocking logic
+            renderNameGrid();
             showScreen('screen-names');
         }
 
         function selectStaff(name) {
             currentStaff = name;
             document.getElementById("staff-name-title").innerText = `${currentStaff} (${currentType})`;
+            document.getElementById("video-container").style.borderColor =
+                currentType === 'IN' ? 'var(--color-in-end)' : 'var(--color-out-end)';
             showScreen('screen-camera');
             startCamera();
         }
@@ -380,110 +322,83 @@
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
                 video.srcObject = videoStream;
-            } catch (err) { Swal.fire('Camera Error', 'Please allow camera access in your browser settings.', 'error'); }
+            } catch (err) {
+                Swal.fire('Camera Error', 'Please allow camera access in your browser settings.', 'error');
+            }
         }
 
-        function stopCamera() { if (videoStream) videoStream.getTracks().forEach(track => track.stop()); }
+        function stopCamera() {
+            if (videoStream) videoStream.getTracks().forEach(track => track.stop());
+        }
 
         function takeSnapshot() {
+            const btn = document.getElementById('btn-snap');
+            btn.disabled = true;
+            btn.innerText = 'PROCESSING...';
+
             const canvas = document.getElementById('canvas'), video = document.getElementById('video');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             stopCamera();
             submitData(canvas.toDataURL('image/jpeg', 0.8));
         }
 
         // ==========================================
-        // 6. SEND DATA & SYNC (DAH DIPERBAIKI)
+        // 6. HANTAR DATA — utamakan kestabilan, simpan offline jika gagal
         // ==========================================
-        function submitData(imageBase64) {
-            // KESILAPAN SEBELUM NI DI SINI: Tertinggal action: "kiosk_punch"
-            const payload = { 
-                action: "kiosk_punch", 
-                staffName: currentStaff, 
-                type: currentType, 
-                imageBase64: imageBase64, 
-                timestamp: new Date().toISOString() 
+        async function submitData(imageBase64) {
+            const payload = {
+                action: "kiosk_punch",
+                staffName: currentStaff,
+                type: currentType,
+                imageBase64: imageBase64,
+                timestamp: new Date().toISOString()
             };
 
             if (!navigator.onLine) {
                 offlineQueue.push(payload);
-                updateLiveStatus(currentStaff, currentType);
-                showSuccessPopup("Saved (Offline)", "Data will be synced when connection is restored.");
+                saveQueue();
+                resetSnapButton();
+                showSuccessPopup("Saved (Offline)", "Tiada sambungan internet. Data disimpan dan akan dihantar secara automatik apabila online semula.");
                 return;
             }
 
-            Swal.fire({ title: 'Uploading Data...', html: '<lottie-player src="https://assets8.lottiefiles.com/packages/lf20_b88nh30c.json" background="transparent" speed="1" style="width: 100px; height: 100px; margin: auto;" loop autoplay></lottie-player>', allowOutsideClick: false, showConfirmButton: false });
+            Swal.fire({
+                title: 'Uploading Data...',
+                html: '<div style="font-size:40px;">⏳</div>',
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
 
-            // PASTIKAN Content-Type ditukar kepada text/plain untuk elak halangan browser
-            fetch(SCRIPT_URL, {
-                method: 'POST', 
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'text/plain' }, 
-                body: JSON.stringify(payload)
-            }).then(() => {
-                updateLiveStatus(currentStaff, currentType);
-                const quoteList = currentType === 'IN' ? quotesIn : quotesOut;
-                const randomQuote = quoteList[Math.floor(Math.random() * quoteList.length)];
-                showSuccessPopup("Success!", `Record for <b>${currentStaff}</b> saved.<hr style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;"><p style='color:#475569; font-style:italic; font-size:14px; line-height:1.5;'>${randomQuote}</p>`);
-            }).catch(() => {
+            const ok = await sendToServer(payload);
+            resetSnapButton();
+
+            if (ok) {
+                showSuccessPopup("Success!", `Record for <b>${currentStaff}</b> (${currentType}) saved.`);
+            } else {
                 offlineQueue.push(payload);
-                updateLiveStatus(currentStaff, currentType);
-                showSuccessPopup("Saved (Offline)", "Server error. Data temporarily saved.");
+                saveQueue();
+                showSuccessPopup("Saved (Offline)", "Tidak dapat sambung ke server. Data disimpan sementara dan akan cuba dihantar semula.");
+            }
+        }
+
+        function resetSnapButton() {
+            const btn = document.getElementById('btn-snap');
+            btn.disabled = false;
+            btn.innerText = 'SNAP & SUBMIT';
+        }
+
+        function showSuccessPopup(title, html) {
+            Swal.fire({
+                icon: title === 'Success!' ? 'success' : 'info',
+                title: title,
+                html: html,
+                confirmButtonColor: '#1e293b'
+            }).then(() => {
+                showScreen('screen-main');
             });
         }
-
-        // ==========================================
-        // 7. DASHBOARD ADMIN LOGIC
-        // ==========================================
-        function requestPin() {
-            Swal.fire({ title: 'HR Admin Login', input: 'password', inputAttributes: { inputmode: 'numeric', maxlength: 6, placeholder: 'Enter 6-digit PIN' }, showCancelButton: true, confirmButtonText: 'Login', confirmButtonColor: '#1e293b' })
-            .then((result) => {
-                if (result.value === ADMIN_PIN) { showScreen('screen-admin'); renderAdminList(); } 
-                else if (result.value) { Swal.fire('Access Denied', 'Incorrect PIN entered.', 'error'); }
-            });
-        }
-
-        function renderAdminList() {
-            const listDiv = document.getElementById("admin-employee-list");
-            listDiv.innerHTML = "";
-            
-            let totalIn = 0;
-            let totalOut = 0;
-
-            employees.forEach((name, index) => {
-                const state = employeeStatus[name] || { status: 'OUT' };
-                if (state.status === 'IN') totalIn++; else totalOut++;
-
-                const badgeColor = state.status === 'IN' ? '#10b981' : '#94a3b8';
-                const statusHtml = `<span style="color:${badgeColor}; font-size:11px; background:${state.status === 'IN'?'#dcfce7':'#f1f5f9'}; padding:3px 8px; border-radius:12px; margin-left:8px; font-weight:bold;">${state.status === 'IN' ? '🟢 IN' : '⚪ OUT'}</span>`;
-                
-                const item = document.createElement("div");
-                item.className = "admin-item";
-                item.innerHTML = `<div style="display:flex; align-items:center;"><span style="font-weight: 500;">${name}</span>${statusHtml}</div><button class="btn-delete" onclick="removeEmployee(${index})">Delete</button>`;
-                listDiv.appendChild(item);
-            });
-
-            document.getElementById("stat-total").innerText = employees.length;
-            document.getElementById("stat-in").innerText = totalIn;
-            document.getElementById("stat-out").innerText = totalOut;
-        }
-
-        function addEmployee() {
-            const input = document.getElementById("new-employee-name");
-            const name = input.value.trim().toUpperCase();
-            if (name && !employees.includes(name)) {
-                employees.push(name); saveData(); input.value = "";
-                Swal.fire({icon: 'success', title: 'Added Successfully', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
-            } else if (employees.includes(name)) { Swal.fire('Error', 'Name already exists.', 'warning'); }
-        }
-
-        function removeEmployee(index) {
-            Swal.fire({ title: 'Are you sure?', text: employees[index] + " will be removed.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, Delete' })
-            .then((result) => { if (result.isConfirmed) { employees.splice(index, 1); saveData(); } });
-        }
-
-        function openSpreadsheet() { window.open(SHEET_URL, '_blank'); }
     </script>
 </body>
 </html>
