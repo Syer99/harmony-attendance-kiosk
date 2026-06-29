@@ -167,13 +167,13 @@
             <button class="btn-main btn-in" onclick="selectType('IN')"><span>CLOCK IN</span></button>
             <button class="btn-main btn-out" onclick="selectType('OUT')"><span>CLOCK OUT</span></button>
         </div>
-        <div class="pending-badge" id="pending-badge">0 belum hantar</div>
+        <div class="pending-badge" id="pending-badge">0 pending sync</div>
     </div>
 
     <div id="screen-names" class="screen">
         <div class="clean-panel">
             <h2 id="type-title">Select Name</h2>
-            <p id="names-loading" style="display:none;">Memuatkan status staff...</p>
+            <p id="names-loading" style="display:none;">Loading staff status...</p>
             <div class="name-grid" id="name-list"></div>
             <button class="btn-back" onclick="showScreen('screen-main')">← Cancel</button>
         </div>
@@ -192,12 +192,12 @@
 
     <script>
         // ==========================================
-        // 1. SETTINGS — TUKAR URL INI SELEPAS DEPLOY APPS SCRIPT
+        // 1. SETTINGS — UPDATE THIS URL AFTER DEPLOYING APPS SCRIPT
         // ==========================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDmc2MieuuiwpfWOlqaG0JJQf1iDgoCiT9Lu2elOYzn__VfdqmQl_OhegOVl5mPt3L2Q/exec";
 
         // ==========================================
-        // 2. STAFF LIST (edit terus di sini, tanpa dashboard admin)
+        // 2. STAFF LIST (edit directly here, no admin dashboard needed)
         // ==========================================
         const employees = [
             "EN TALIB", "EN ABID", "AINA", "IZZLAN", "FAKHRI",
@@ -206,8 +206,8 @@
             "NATASYA", "SHAFIRAH", "HAZIQ", "HAJAR", "AIMAN"
         ];
 
-        // Cache status terkini setiap staff: { "HAJAR": "IN", "AINA": "OUT", ... }
-        // Staff yang tiada dalam cache dianggap "OUT" (belum pernah clock in).
+        // Cache of each staff member's current status: { "HAJAR": "IN", "AINA": "OUT", ... }
+        // Staff not present in the cache are treated as "OUT" (never clocked in yet).
         let staffStatus = {};
 
         // ==========================================
@@ -226,7 +226,7 @@
         }
 
         // ==========================================
-        // 4. OFFLINE QUEUE (localStorage) — pastikan data tak hilang
+        // 4. OFFLINE QUEUE (localStorage) — ensures data is never lost
         // ==========================================
         let offlineQueue = [];
 
@@ -248,7 +248,7 @@
             const badge = document.getElementById('pending-badge');
             if (offlineQueue.length > 0) {
                 badge.style.display = 'block';
-                badge.innerText = offlineQueue.length + ' belum hantar';
+                badge.innerText = offlineQueue.length + ' pending sync';
             } else {
                 badge.style.display = 'none';
             }
@@ -262,11 +262,11 @@
                 text.innerText = 'Online';
             } else {
                 dot.classList.add('offline');
-                text.innerText = 'Offline (akan auto-sync)';
+                text.innerText = 'Offline (will auto-sync)';
             }
         }
 
-        // Cuba hantar semula apa-apa rekod yang tersangkut di queue
+        // Try to resend any records still stuck in the queue
         async function flushQueue() {
             if (!navigator.onLine || offlineQueue.length === 0) return;
 
@@ -279,11 +279,11 @@
             saveQueue();
         }
 
-        // Hantar satu payload ke Apps Script. Pulangkan true jika berjaya hantar.
+        // Send one payload to Apps Script. Returns true if sent successfully.
         function sendToServer(payload) {
             return fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // wajib utk Apps Script web app dari browser tanpa CORS preflight
+                mode: 'no-cors', // required for Apps Script web app from browser without CORS preflight
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(payload)
             }).then(() => true).catch(() => false);
@@ -303,8 +303,8 @@
             window.addEventListener('offline', updateConnBadge);
         };
 
-        // Dapatkan status terkini semua staff dari server (GET request biasa,
-        // BUKAN no-cors, supaya kita boleh baca response JSON-nya).
+        // Fetch every staff member's current status from the server (a plain
+        // GET request, NOT no-cors, so we can actually read the JSON response).
         async function fetchStaffStatus() {
             try {
                 const res = await fetch(SCRIPT_URL + "?action=get_status", { method: 'GET' });
@@ -313,37 +313,37 @@
                     staffStatus = json.data;
                 }
             } catch (err) {
-                // Jika gagal (offline / server down), guna cache lama yang ada
-                // supaya kiosk masih boleh digunakan dalam mod degraded.
-                console.warn("Tidak dapat memuat status staff:", err);
+                // If this fails (offline / server down), fall back to whatever
+                // cache we already have so the kiosk still works in a degraded mode.
+                console.warn("Could not load staff status:", err);
             }
         }
 
-        // Render senarai nama mengikut filterType ('IN' atau 'OUT').
-        // Staff yang sudah IN tidak boleh pilih CLOCK IN lagi, dan staff
-        // yang masih OUT tidak boleh pilih CLOCK OUT.
+        // Render the name grid for the given filterType ('IN' or 'OUT').
+        // Staff already IN cannot select CLOCK IN again, and staff still
+        // OUT cannot select CLOCK OUT.
         function renderNameGrid(filterType) {
             const grid = document.getElementById("name-list");
             grid.innerHTML = "";
 
             employees.forEach(name => {
-                const state = staffStatus[name] || 'OUT'; // default OUT jika staff baru/tiada rekod
+                const state = staffStatus[name] || 'OUT'; // default OUT for new/unrecorded staff
                 let isDisabled = false;
 
                 if (filterType === 'IN' && state === 'IN') isDisabled = true;
                 if (filterType === 'OUT' && state === 'OUT') isDisabled = true;
 
                 const btn = document.createElement("button");
-                const tagText = state === 'IN' ? '🟢 SUDAH CLOCK IN' : '⚪ BELUM CLOCK IN';
+                const tagText = state === 'IN' ? '🟢 ALREADY CLOCKED IN' : '⚪ NOT CLOCKED IN';
                 btn.innerHTML = `${name}<span class="status-tag" style="color:${state === 'IN' ? '#059669' : '#94a3b8'};">${tagText}</span>`;
 
                 if (isDisabled) {
                     btn.className = "btn-name btn-disabled";
                     btn.onclick = () => {
                         const msg = filterType === 'IN'
-                            ? `${name} sudah Clock IN. Sila pilih CLOCK OUT jika ingin keluar.`
-                            : `${name} belum Clock IN. Sila pilih CLOCK IN dahulu.`;
-                        Swal.fire('Tidak Boleh Teruskan', msg, 'warning');
+                            ? `${name} is already clocked IN. Please select CLOCK OUT instead.`
+                            : `${name} has not clocked IN yet. Please select CLOCK IN first.`;
+                        Swal.fire('Action Not Allowed', msg, 'warning');
                     };
                 } else {
                     btn.className = "btn-name";
@@ -364,7 +364,7 @@
             document.getElementById("type-title").innerText = `Clock ${type} - Select Name`;
             showScreen('screen-names');
 
-            // Tunjuk loading, sembunyikan grid lama semasa fetch status terkini
+            // Show loading, clear old grid while fetching current status
             document.getElementById("names-loading").style.display = "block";
             document.getElementById("name-list").innerHTML = "";
 
@@ -411,7 +411,7 @@
         }
 
         // ==========================================
-        // 6. HANTAR DATA — utamakan kestabilan, simpan offline jika gagal
+        // 6. SEND DATA — prioritize stability, queue offline if it fails
         // ==========================================
         async function submitData(imageBase64) {
             const payload = {
@@ -425,9 +425,9 @@
             if (!navigator.onLine) {
                 offlineQueue.push(payload);
                 saveQueue();
-                staffStatus[currentStaff] = currentType; // update cache supaya UI konsisten walau offline
+                staffStatus[currentStaff] = currentType; // update cache so the UI stays consistent even offline
                 resetSnapButton();
-                showSuccessPopup("Saved (Offline)", "Tiada sambungan internet. Data disimpan dan akan dihantar secara automatik apabila online semula.");
+                showSuccessPopup("Saved (Offline)", "No internet connection. The record has been saved and will be sent automatically once you're back online.");
                 return;
             }
 
@@ -442,15 +442,15 @@
             resetSnapButton();
 
             if (ok) {
-                // Update cache status secara optimistik supaya UI terus konsisten
-                // tanpa perlu fetch semula dari server.
+                // Update the status cache optimistically so the UI stays
+                // consistent right away without needing to refetch.
                 staffStatus[currentStaff] = currentType;
                 showSuccessPopup("Success!", `Record for <b>${currentStaff}</b> (${currentType}) saved.`);
             } else {
                 offlineQueue.push(payload);
                 saveQueue();
-                staffStatus[currentStaff] = currentType; // update cache supaya konsisten walau gagal hantar
-                showSuccessPopup("Saved (Offline)", "Tidak dapat sambung ke server. Data disimpan sementara dan akan cuba dihantar semula.");
+                staffStatus[currentStaff] = currentType; // keep cache consistent even if sending failed
+                showSuccessPopup("Saved (Offline)", "Could not reach the server. The record has been saved temporarily and will be retried.");
             }
         }
 
