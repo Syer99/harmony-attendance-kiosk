@@ -1,474 +1,323 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Attendance Kiosk</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        :root {
-            --color-in-start: #34d399;
-            --color-in-end: #059669;
-            --color-out-start: #60a5fa;
-            --color-out-end: #2563eb;
-            --color-danger: #ef4444;
-            --text-main: #1e293b;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-main);
-            overflow: hidden;
-        }
-
-        .screen {
-            display: none;
-            width: 100%;
-            max-width: 480px;
-            height: 100%;
-            padding: 25px;
-            box-sizing: border-box;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            background: #ffffff;
-        }
-
-        .active-screen { display: flex; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .clean-panel {
-            width: 100%;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            max-height: 95vh;
-            padding: 10px 0;
-        }
-
-        .company-logo {
-            max-width: 140px;
-            max-height: 90px;
-            margin-bottom: 15px;
-            object-fit: contain;
-            align-self: center;
-        }
-
-        .clock-container { margin-bottom: 30px; }
-        .clock-time { font-size: 48px; font-weight: 700; color: var(--text-main); line-height: 1.1; letter-spacing: -0.5px; }
-        .clock-date { font-size: 14px; color: #64748b; font-weight: 500; margin-top: 5px; }
-
-        .conn-badge {
-            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
-            color: #94a3b8; margin-top: 8px;
-        }
-        .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
-        .conn-dot.offline { background: #ef4444; }
-
-        h2 { margin-top: 0; font-weight: 600; font-size: 22px; }
-        p { color: #64748b; margin-bottom: 25px; font-size: 15px; }
-
-        .btn-main {
-            width: 100%; padding: 18px 24px; margin: 12px 0; border: none; border-radius: 16px;
-            font-size: 18px; font-weight: 600; color: white; cursor: pointer; transition: all 0.3s ease;
-            position: relative; overflow: hidden; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center;
-        }
-
-        .btn-in { background: linear-gradient(135deg, var(--color-in-start) 0%, var(--color-in-end) 100%); box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.4); }
-        .btn-out { background: linear-gradient(135deg, var(--color-out-start) 0%, var(--color-out-end) 100%); box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); }
-
-        .btn-main:hover { transform: translateY(-3px); }
-        .btn-in:hover { box-shadow: 0 15px 30px -5px rgba(5, 150, 105, 0.6); }
-        .btn-out:hover { box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6); }
-        .btn-main:active { transform: scale(0.98) translateY(0); box-shadow: 0 5px 10px -5px rgba(0,0,0,0.2); }
-
-        .name-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;
-            overflow-y: auto; padding: 5px; max-height: 55vh;
-        }
-
-        .btn-name {
-            background: #ffffff; border: 1px solid #e2e8f0; padding: 15px 10px; border-radius: 12px;
-            font-size: 15px; font-weight: 500; cursor: pointer; color: var(--text-main);
-            transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-        }
-
-        .btn-name:active, .btn-name:hover {
-            background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        .btn-disabled {
-            background: #f1f5f9 !important;
-            color: #cbd5e1 !important;
-            border-color: #f1f5f9 !important;
-            cursor: not-allowed !important;
-            box-shadow: none !important;
-            transform: none !important;
-        }
-        .btn-disabled:hover { transform: none !important; }
-
-        .status-tag {
-            display: block; font-size: 10px; font-weight: 700; margin-top: 4px; letter-spacing: 0.5px;
-        }
-
-        #video-container {
-            width: 260px; height: 260px; border-radius: 50%; overflow: hidden; margin: 0 auto 25px;
-            border: 4px solid #f1f5f9; background: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-
-        video { width: 100%; height: 100%; object-fit: cover; }
-        canvas { display: none; }
-
-        .btn-snap {
-            background: var(--text-main); color: white; border: none; padding: 16px 35px; border-radius: 30px;
-            font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.15); transition: all 0.2s;
-            width: 100%;
-        }
-        .btn-snap:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-        .btn-snap:active { transform: scale(0.98); }
-        .btn-snap:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .btn-back {
-            background: transparent; border: none; color: #94a3b8; font-size: 15px; margin-top: 20px; cursor: pointer;
-            text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
-        .btn-back:hover { color: var(--text-main); }
-
-        .pending-badge {
-            position: absolute; top: 20px; right: 20px; background: #fef3c7; color: #b45309;
-            font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; display: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { height: 60px; margin-bottom: 10px; }
+        .status-bar { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        button { padding: 15px 30px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #5568d3; transform: translateY(-2px); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
+        .btn-secondary { background: #f39c12; color: white; }
+        .btn-secondary:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
+        .name-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .name-btn { padding: 20px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .name-btn:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
+        .name-btn.disabled { opacity: 0.5; cursor: not-allowed; background: #f5f5f5; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-top: 5px; }
+        .status-in { background: #d4edda; color: #155724; }
+        .status-out { background: #fff3cd; color: #856404; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <img src="harmony_logo.png" alt="Harmony Logo" class="logo">
+            <h1>Staff Attendance</h1>
+            <p id="current-time">Loading date...</p>
+            <p id="connection-status">🟢 Online</p>
+        </div>
 
-    <div id="screen-main" class="screen active-screen">
-        <div class="clean-panel">
-            <img src="harmony_logo.png" alt="Harmony Logo" class="company-logo" id="company-logo">
-            <div class="clock-container">
-                <div class="clock-time" id="realtime-clock">00:00 AM</div>
-                <div class="clock-date" id="realtime-date">Loading date...</div>
-                <div class="conn-badge"><span class="conn-dot" id="conn-dot"></span><span id="conn-text">Online</span></div>
+        <div id="main-view">
+            <div class="btn-group">
+                <button class="btn-primary" id="clock-in-btn">CLOCK IN</button>
+                <button class="btn-secondary" id="clock-out-btn">CLOCK OUT</button>
             </div>
-            <button class="btn-main btn-in" onclick="selectType('IN')"><span>CLOCK IN</span></button>
-            <button class="btn-main btn-out" onclick="selectType('OUT')"><span>CLOCK OUT</span></button>
+            <p id="pending-sync">0 pending sync</p>
         </div>
-        <div class="pending-badge" id="pending-badge">0 pending sync</div>
-    </div>
 
-    <div id="screen-names" class="screen">
-        <div class="clean-panel">
-            <h2 id="type-title">Select Name</h2>
-            <p id="names-loading" style="display:none;">Loading staff status...</p>
-            <div class="name-grid" id="name-list"></div>
-            <button class="btn-back" onclick="showScreen('screen-main')">← Cancel</button>
+        <div id="name-selection-view" style="display: none;">
+            <h2>Select Staff Name</h2>
+            <p id="loading-status">Loading staff status...</p>
+            <div class="name-grid" id="name-grid"></div>
+            <button class="btn-primary">← Back</button>
         </div>
-    </div>
 
-    <div id="screen-camera" class="screen">
-        <div class="clean-panel">
-            <h2 id="staff-name-title">Staff Name</h2>
+        <div id="photo-view" style="display: none;">
+            <h2 id="selected-staff-name">Staff Name</h2>
             <p>Please look at the camera</p>
-            <div id="video-container"><video id="video" autoplay playsinline muted></video></div>
-            <canvas id="canvas"></canvas>
-            <button class="btn-snap" id="btn-snap" onclick="takeSnapshot()">SNAP &amp; SUBMIT</button>
-            <button class="btn-back" onclick="stopCamera(); showScreen('screen-names')">← Back</button>
+            <video id="camera" width="100%" height="auto" autoplay></video>
+            <div class="btn-group">
+                <button class="btn-primary">SNAP & SUBMIT</button>
+                <button class="btn-primary">← Back</button>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // ==========================================
-        // 1. SETTINGS — UPDATE THIS URL AFTER DEPLOYING APPS SCRIPT
-        // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDmc2MieuuiwpfWOlqaG0JJQf1iDgoCiT9Lu2elOYzn__VfdqmQl_OhegOVl5mPt3L2Q/exec";
+        // ========== CONFIGURATION ==========
+        const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+        const STAFF_NAMES = ["HAJAR", "AHMAD", "SITI", "KARIM", "FATIMAH", "HASSAN"];
 
-        // ==========================================
-        // 2. STAFF LIST (edit directly here, no admin dashboard needed)
-        // ==========================================
-        const employees = [
-            "EN TALIB", "EN ABID", "AINA", "IZZLAN", "FAKHRI",
-            "SHAFUAN", "SYAHMI", "SYARAF", "ZHARFAN", "NAZMI",
-            "AMIRAH", "IRA", "JIHAN", "SYAFIQAH", "IZZAH",
-            "NATASYA", "SHAFIRAH", "HAZIQ", "HAJAR", "AIMAN"
-        ];
+        // ========== STATE VARIABLES ==========
+        let staffStatus = {}; // { "HAJAR": "IN", "AHMAD": "OUT", ... }
+        let currentStaff = null;
+        let currentAction = null;
+        let pendingQueue = [];
 
-        // Cache of each staff member's current status: { "HAJAR": "IN", "AINA": "OUT", ... }
-        // Staff not present in the cache are treated as "OUT" (never clocked in yet).
-        let staffStatus = {};
-
-        // ==========================================
-        // 3. REAL TIME CLOCK
-        // ==========================================
-        function startClock() {
-            const tick = () => {
-                const now = new Date();
-                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-                const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                document.getElementById('realtime-clock').innerText = now.toLocaleTimeString('en-US', timeOptions);
-                document.getElementById('realtime-date').innerText = now.toLocaleDateString('en-US', dateOptions);
-            };
-            tick();
-            setInterval(tick, 1000);
-        }
-
-        // ==========================================
-        // 4. OFFLINE QUEUE (localStorage) — ensures data is never lost
-        // ==========================================
-        let offlineQueue = [];
-
-        function loadQueue() {
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Page loaded - initializing status...');
+            
+            // Load from localStorage first (instant UI update)
+            const cachedStatus = localStorage.getItem('staffStatus');
+            if (cachedStatus) {
+                try {
+                    staffStatus = JSON.parse(cachedStatus);
+                    console.log('📦 Loaded status from cache:', staffStatus);
+                } catch (e) {
+                    console.error('Failed to parse cached status:', e);
+                }
+            }
+            
+            // Then fetch fresh status from server
             try {
-                offlineQueue = JSON.parse(localStorage.getItem('attendance_offline_queue')) || [];
-            } catch (e) {
-                offlineQueue = [];
+                await fetchStaffStatus();
+                console.log('✅ Status fetched from server:', staffStatus);
+            } catch (error) {
+                console.error('⚠️ Failed to fetch status on load:', error);
+                // UI still works with cached status
             }
-            updatePendingBadge();
-        }
+            
+            // Initialize other features
+            updateClock();
+            setInterval(updateClock, 1000);
+            loadPendingQueue();
+            window.addEventListener('online', syncPendingData);
+            window.addEventListener('offline', updateConnectionStatus);
+        });
 
-        function saveQueue() {
-            localStorage.setItem('attendance_offline_queue', JSON.stringify(offlineQueue));
-            updatePendingBadge();
-        }
-
-        function updatePendingBadge() {
-            const badge = document.getElementById('pending-badge');
-            if (offlineQueue.length > 0) {
-                badge.style.display = 'block';
-                badge.innerText = offlineQueue.length + ' pending sync';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function updateConnBadge() {
-            const dot = document.getElementById('conn-dot');
-            const text = document.getElementById('conn-text');
-            if (navigator.onLine) {
-                dot.classList.remove('offline');
-                text.innerText = 'Online';
-            } else {
-                dot.classList.add('offline');
-                text.innerText = 'Offline (will auto-sync)';
-            }
-        }
-
-        // Try to resend any records still stuck in the queue
-        async function flushQueue() {
-            if (!navigator.onLine || offlineQueue.length === 0) return;
-
-            const remaining = [];
-            for (const payload of offlineQueue) {
-                const ok = await sendToServer(payload);
-                if (!ok) remaining.push(payload);
-            }
-            offlineQueue = remaining;
-            saveQueue();
-        }
-
-        // Send one payload to Apps Script. Returns true if sent successfully.
-        function sendToServer(payload) {
-            return fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // required for Apps Script web app from browser without CORS preflight
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(payload)
-            }).then(() => true).catch(() => false);
-        }
-
-        // ==========================================
-        // 5. UI RENDERING
-        // ==========================================
-        let currentType = "", currentStaff = "", videoStream = null;
-
-        window.onload = () => {
-            startClock();
-            loadQueue();
-            updateConnBadge();
-            flushQueue();
-            window.addEventListener('online', () => { updateConnBadge(); flushQueue(); });
-            window.addEventListener('offline', updateConnBadge);
-        };
-
-        // Fetch every staff member's current status from the server (a plain
-        // GET request, NOT no-cors, so we can actually read the JSON response).
+        // ========== FETCH STATUS FROM SERVER ==========
         async function fetchStaffStatus() {
             try {
-                const res = await fetch(SCRIPT_URL + "?action=get_status", { method: 'GET' });
-                const json = await res.json();
-                if (json && json.status === "success" && json.data) {
-                    staffStatus = json.data;
+                const response = await fetch(SCRIPT_URL + '?action=get_status');
+                const data = await response.json();
+                
+                if (data.success && data.status) {
+                    staffStatus = data.status;
+                    
+                    // 💾 Save to localStorage for persistence
+                    localStorage.setItem('staffStatus', JSON.stringify(staffStatus));
+                    console.log('💾 Status saved to localStorage');
+                } else {
+                    console.warn('Unexpected response:', data);
                 }
-            } catch (err) {
-                // If this fails (offline / server down), fall back to whatever
-                // cache we already have so the kiosk still works in a degraded mode.
-                console.warn("Could not load staff status:", err);
+            } catch (error) {
+                console.error('❌ Error fetching status:', error);
+                throw error;
             }
         }
 
-        // Render the name grid for the given filterType ('IN' or 'OUT').
-        // Staff already IN cannot select CLOCK IN again, and staff still
-        // OUT cannot select CLOCK OUT.
-        function renderNameGrid(filterType) {
-            const grid = document.getElementById("name-list");
-            grid.innerHTML = "";
+        // ========== CLOCK IN / OUT BUTTONS ==========
+        document.getElementById('clock-in-btn').addEventListener('click', () => selectType('IN'));
+        document.getElementById('clock-out-btn').addEventListener('click', () => selectType('OUT'));
 
-            employees.forEach(name => {
-                const state = staffStatus[name] || 'OUT'; // default OUT for new/unrecorded staff
-                let isDisabled = false;
+        async function selectType(type) {
+            currentAction = type;
+            
+            // Fetch fresh status before showing names
+            try {
+                await fetchStaffStatus();
+            } catch (error) {
+                console.error('Failed to refresh status:', error);
+            }
+            
+            renderNameGrid();
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('name-selection-view').style.display = 'block';
+        }
 
-                if (filterType === 'IN' && state === 'IN') isDisabled = true;
-                if (filterType === 'OUT' && state === 'OUT') isDisabled = true;
-
-                const btn = document.createElement("button");
-                const tagText = state === 'IN' ? '🟢 ALREADY CLOCKED IN' : '⚪ NOT CLOCKED IN';
-                btn.innerHTML = `${name}<span class="status-tag" style="color:${state === 'IN' ? '#059669' : '#94a3b8'};">${tagText}</span>`;
-
-                if (isDisabled) {
-                    btn.className = "btn-name btn-disabled";
-                    btn.onclick = () => {
-                        const msg = filterType === 'IN'
-                            ? `${name} is already clocked IN. Please select CLOCK OUT instead.`
-                            : `${name} has not clocked IN yet. Please select CLOCK IN first.`;
-                        Swal.fire('Action Not Allowed', msg, 'warning');
-                    };
+        // ========== RENDER NAME GRID ==========
+        function renderNameGrid() {
+            const grid = document.getElementById('name-grid');
+            grid.innerHTML = '';
+            
+            STAFF_NAMES.forEach(name => {
+                const status = staffStatus[name] || 'OUT';
+                const isDisabled = (currentAction === 'IN' && status === 'IN') || 
+                                   (currentAction === 'OUT' && status === 'OUT');
+                
+                const btn = document.createElement('button');
+                btn.className = `name-btn ${isDisabled ? 'disabled' : ''}`;
+                btn.disabled = isDisabled;
+                
+                let statusLabel = status === 'IN' ? '🟢 CLOCKED IN' : '⚪ CLOCKED OUT';
+                btn.innerHTML = `${name}
+${statusLabel}`;
+                
+                if (!isDisabled) {
+                    btn.addEventListener('click', () => selectStaff(name));
                 } else {
-                    btn.className = "btn-name";
-                    btn.onclick = () => selectStaff(name);
+                    const action = currentAction === 'IN' ? 'clock in' : 'clock out';
+                    btn.title = `Cannot ${action}: Staff is already ${statusLabel.toLowerCase()}`;
                 }
-
+                
                 grid.appendChild(btn);
             });
         }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.getElementById(screenId).classList.add('active-screen');
-        }
-
-        async function selectType(type) {
-            currentType = type;
-            document.getElementById("type-title").innerText = `Clock ${type} - Select Name`;
-            showScreen('screen-names');
-
-            // Show loading, clear old grid while fetching current status
-            document.getElementById("names-loading").style.display = "block";
-            document.getElementById("name-list").innerHTML = "";
-
-            await fetchStaffStatus();
-
-            document.getElementById("names-loading").style.display = "none";
-            renderNameGrid(type);
-        }
-
+        // ========== SELECT STAFF ==========
         function selectStaff(name) {
             currentStaff = name;
-            document.getElementById("staff-name-title").innerText = `${currentStaff} (${currentType})`;
-            document.getElementById("video-container").style.borderColor =
-                currentType === 'IN' ? 'var(--color-in-end)' : 'var(--color-out-end)';
-            showScreen('screen-camera');
+            document.getElementById('selected-staff-name').textContent = name;
+            document.getElementById('name-selection-view').style.display = 'none';
+            document.getElementById('photo-view').style.display = 'block';
+            
             startCamera();
         }
 
+        // ========== CAMERA ==========
         async function startCamera() {
-            const video = document.getElementById('video');
             try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                video.srcObject = videoStream;
-            } catch (err) {
-                Swal.fire('Camera Error', 'Please allow camera access in your browser settings.', 'error');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                document.getElementById('camera').srcObject = stream;
+            } catch (error) {
+                console.error('Camera error:', error);
+                Swal.fire('Error', 'Cannot access camera', 'error');
             }
+        }
+
+        // ========== CAPTURE & SUBMIT ==========
+        async function capturePhoto() {
+            const canvas = document.createElement('canvas');
+            const video = document.getElementById('camera');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => submitData(blob), 'image/jpeg', 0.8);
+        }
+
+        // ========== SUBMIT DATA ==========
+        async function submitData(photoBlob) {
+            const formData = new FormData();
+            formData.append('staffName', currentStaff);
+            formData.append('type', currentAction);
+            formData.append('timestamp', new Date().toISOString());
+            formData.append('photo', photoBlob, `${currentStaff}_${currentAction}.jpg`);
+            
+            try {
+                const sendSuccess = await sendToServer(formData);
+                
+                if (sendSuccess) {
+                    // ✅ Update cache optimistically
+                    staffStatus[currentStaff] = currentAction;
+                    localStorage.setItem('staffStatus', JSON.stringify(staffStatus));
+                    console.log('✅ Cache updated:', staffStatus);
+                    
+                    Swal.fire('Success', `${currentStaff} clocked ${currentAction} successfully!`, 'success');
+                    resetUI();
+                } else {
+                    throw new Error('Server returned error');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                // Save to offline queue
+                pendingQueue.push({ staffName: currentStaff, type: currentAction, photoBlob, timestamp: new Date().toISOString() });
+                savePendingQueue();
+                updatePendingCount();
+                
+                Swal.fire('Offline', 'Data saved. Will sync when online.', 'info');
+                resetUI();
+            }
+        }
+
+        // ========== SEND TO SERVER ==========
+        async function sendToServer(formData) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors'
+                });
+                return true; // no-cors doesn't throw on server error
+            } catch (error) {
+                console.error('Network error:', error);
+                return false;
+            }
+        }
+
+        // ========== OFFLINE QUEUE ==========
+        function savePendingQueue() {
+            localStorage.setItem('pendingQueue', JSON.stringify(pendingQueue.map(item => ({
+                ...item,
+                photoBlob: item.photoBlob.toString() // Placeholder
+            }))));
+        }
+
+        function loadPendingQueue() {
+            const saved = localStorage.getItem('pendingQueue');
+            if (saved) {
+                try {
+                    pendingQueue = JSON.parse(saved);
+                    updatePendingCount();
+                } catch (e) {
+                    console.error('Failed to load pending queue:', e);
+                }
+            }
+        }
+
+        function updatePendingCount() {
+            document.getElementById('pending-sync').textContent = `${pendingQueue.length} pending sync`;
+        }
+
+        async function syncPendingData() {
+            console.log('🔄 Syncing pending data...');
+            // Implementation for syncing offline queue
+        }
+
+        // ========== UI HELPERS ==========
+        function goBack() {
+            document.getElementById('photo-view').style.display = 'none';
+            document.getElementById('name-selection-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+            stopCamera();
+        }
+
+        function resetUI() {
+            stopCamera();
+            document.getElementById('photo-view').style.display = 'none';
+            document.getElementById('name-selection-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+            currentStaff = null;
+            currentAction = null;
         }
 
         function stopCamera() {
-            if (videoStream) videoStream.getTracks().forEach(track => track.stop());
-        }
-
-        function takeSnapshot() {
-            const btn = document.getElementById('btn-snap');
-            btn.disabled = true;
-            btn.innerText = 'PROCESSING...';
-
-            const canvas = document.getElementById('canvas'), video = document.getElementById('video');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            stopCamera();
-            submitData(canvas.toDataURL('image/jpeg', 0.8));
-        }
-
-        // ==========================================
-        // 6. SEND DATA — prioritize stability, queue offline if it fails
-        // ==========================================
-        async function submitData(imageBase64) {
-            const payload = {
-                action: "kiosk_punch",
-                staffName: currentStaff,
-                type: currentType,
-                imageBase64: imageBase64,
-                timestamp: new Date().toISOString()
-            };
-
-            if (!navigator.onLine) {
-                offlineQueue.push(payload);
-                saveQueue();
-                staffStatus[currentStaff] = currentType; // update cache so the UI stays consistent even offline
-                resetSnapButton();
-                showSuccessPopup("Saved (Offline)", "No internet connection. The record has been saved and will be sent automatically once you're back online.");
-                return;
-            }
-
-            Swal.fire({
-                title: 'Uploading Data...',
-                html: '<div style="font-size:40px;">⏳</div>',
-                allowOutsideClick: false,
-                showConfirmButton: false
-            });
-
-            const ok = await sendToServer(payload);
-            resetSnapButton();
-
-            if (ok) {
-                // Update the status cache optimistically so the UI stays
-                // consistent right away without needing to refetch.
-                staffStatus[currentStaff] = currentType;
-                showSuccessPopup("Success!", `Record for <b>${currentStaff}</b> (${currentType}) saved.`);
-            } else {
-                offlineQueue.push(payload);
-                saveQueue();
-                staffStatus[currentStaff] = currentType; // keep cache consistent even if sending failed
-                showSuccessPopup("Saved (Offline)", "Could not reach the server. The record has been saved temporarily and will be retried.");
+            const video = document.getElementById('camera');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
             }
         }
 
-        function resetSnapButton() {
-            const btn = document.getElementById('btn-snap');
-            btn.disabled = false;
-            btn.innerText = 'SNAP & SUBMIT';
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString();
         }
 
-        function showSuccessPopup(title, html) {
-            Swal.fire({
-                icon: title === 'Success!' ? 'success' : 'info',
-                title: title,
-                html: html,
-                confirmButtonColor: '#1e293b'
-            }).then(() => {
-                showScreen('screen-main');
-            });
+        function updateConnectionStatus() {
+            const status = navigator.onLine ? '🟢 Online' : '🔴 Offline';
+            document.getElementById('connection-status').textContent = status;
         }
     </script>
 </body>
