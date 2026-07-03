@@ -194,7 +194,7 @@
         // ==========================================
         // 1. SETTINGS — UPDATE THIS URL AFTER DEPLOYING APPS SCRIPT
         // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8QyCCbtpRvxe4yxArK5S6HKtlL4vn1To-k6u6HHiDahPkDIel0NrBYtMYdO0Ka8zR1g/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDmc2MieuuiwpfWOlqaG0JJQf1iDgoCiT9Lu2elOYzn__VfdqmQl_OhegOVl5mPt3L2Q/exec";
 
         // ==========================================
         // 2. STAFF LIST (edit directly here, no admin dashboard needed)
@@ -208,17 +208,7 @@
 
         // Cache of each staff member's current status: { "HAJAR": "IN", "AINA": "OUT", ... }
         // Staff not present in the cache are treated as "OUT" (never clocked in yet).
-        // Loaded from localStorage on startup as a fallback when the server is unreachable.
         let staffStatus = {};
-        try {
-            staffStatus = JSON.parse(localStorage.getItem('staff_status_cache')) || {};
-        } catch (e) {
-            staffStatus = {};
-        }
-
-        function saveStaffStatusCache() {
-            localStorage.setItem('staff_status_cache', JSON.stringify(staffStatus));
-        }
 
         // ==========================================
         // 3. REAL TIME CLOCK
@@ -304,15 +294,12 @@
         // ==========================================
         let currentType = "", currentStaff = "", videoStream = null;
 
-        window.onload = async () => {
+        window.onload = () => {
             startClock();
             loadQueue();
             updateConnBadge();
-            // Fetch the latest staff status from the server immediately on page load
-            // so the kiosk always knows who is clocked IN/OUT, even after a refresh.
-            await fetchStaffStatus();
             flushQueue();
-            window.addEventListener('online', () => { updateConnBadge(); flushQueue(); fetchStaffStatus(); });
+            window.addEventListener('online', () => { updateConnBadge(); flushQueue(); });
             window.addEventListener('offline', updateConnBadge);
         };
 
@@ -324,7 +311,6 @@
                 const json = await res.json();
                 if (json && json.status === "success" && json.data) {
                     staffStatus = json.data;
-                    saveStaffStatusCache(); // persist to localStorage for offline fallback
                 }
             } catch (err) {
                 // If this fails (offline / server down), fall back to whatever
@@ -425,9 +411,17 @@
         }
 
         // ==========================================
-        // 6. SEND DATA — prioritize stability, queue offline if it fails
+        // 6. SEND DATA — show success instantly, upload silently in background
         // ==========================================
-        async function submitData(imageBase64) {
+        // Key design: because we use mode: 'no-cors', the browser can never
+        // read the server's response anyway — the fetch result is always an
+        // opaque blob. So waiting for it before showing success adds delay
+        // with zero benefit. Instead we:
+        //   1. Update the local status cache immediately
+        //   2. Show the success popup right away (staff done in ~1 second)
+        //   3. Fire the upload to the server in the background
+        //   4. If the upload fails, quietly push to the offline queue for retry
+        function submitData(imageBase64) {
             const payload = {
                 action: "kiosk_punch",
                 staffName: currentStaff,
@@ -436,39 +430,29 @@
                 timestamp: new Date().toISOString()
             };
 
+            // Update local cache immediately — UI is consistent from this point
+            staffStatus[currentStaff] = currentType;
+            resetSnapButton();
+
             if (!navigator.onLine) {
+                // Offline — queue for later, show success right away
                 offlineQueue.push(payload);
                 saveQueue();
-                staffStatus[currentStaff] = currentType; // update cache so the UI stays consistent even offline
-                saveStaffStatusCache();
-                resetSnapButton();
-                showSuccessPopup("Saved (Offline)", "No internet connection. The record has been saved and will be sent automatically once you're back online.");
+                showSuccessPopup(currentStaff, currentType, true);
                 return;
             }
 
-            Swal.fire({
-                title: 'Uploading Data...',
-                html: '<div style="font-size:40px;">⏳</div>',
-                allowOutsideClick: false,
-                showConfirmButton: false
+            // Show success popup immediately — don't wait for upload
+            showSuccessPopup(currentStaff, currentType, false);
+
+            // Fire upload silently in the background
+            sendToServer(payload).then(ok => {
+                if (!ok) {
+                    // Upload failed quietly — push to offline queue for retry
+                    offlineQueue.push(payload);
+                    saveQueue();
+                }
             });
-
-            const ok = await sendToServer(payload);
-            resetSnapButton();
-
-            if (ok) {
-                // Update the status cache optimistically so the UI stays
-                // consistent right away without needing to refetch.
-                staffStatus[currentStaff] = currentType;
-                saveStaffStatusCache();
-                showSuccessPopup("Success!", `Record for <b>${currentStaff}</b> (${currentType}) saved.`);
-            } else {
-                offlineQueue.push(payload);
-                saveQueue();
-                staffStatus[currentStaff] = currentType; // keep cache consistent even if sending failed
-                saveStaffStatusCache();
-                showSuccessPopup("Saved (Offline)", "Could not reach the server. The record has been saved temporarily and will be retried.");
-            }
         }
 
         function resetSnapButton() {
@@ -477,12 +461,29 @@
             btn.innerText = 'SNAP & SUBMIT';
         }
 
-        function showSuccessPopup(title, html) {
+        function showSuccessPopup(staffName, type, isOffline) {
+            const icon = isOffline ? 'info' : 'success';
+            const title = isOffline ? 'Saved (Offline)' : 'Attendance Recorded!';
+            const subtitle = isOffline
+                ? 'No connection — will sync automatically when back online.'
+                : `Syncing to server in the background.`;
+
             Swal.fire({
-                icon: title === 'Success!' ? 'success' : 'info',
+                icon: icon,
                 title: title,
-                html: html,
-                confirmButtonColor: '#1e293b'
+                html: `
+                    <p style="font-size:17px; font-weight:600; color:#1e293b; margin:0 0 4px;">
+                        ${staffName}
+                    </p>
+                    <p style="font-size:13px; color:#64748b; margin:0 0 12px;">
+                        Clock ${type} — ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    </p>
+                    <p style="font-size:12px; color:#94a3b8; margin:0;">${subtitle}</p>
+                `,
+                confirmButtonColor: '#1e293b',
+                confirmButtonText: 'Done',
+                timer: 4000,
+                timerProgressBar: true
             }).then(() => {
                 showScreen('screen-main');
             });
